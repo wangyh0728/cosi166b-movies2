@@ -7,4 +7,4 @@ Algorithm: For predict(u,m), firstly find the most similar users of u and their 
 
 Analysis(average): Error Mean: 0.9, Stddev: 0.6, rsm:1.12. As k gets larger, an and rsm go  up and stddev goes down.
 
-BenchMarking: Running time per prediction is around 0.02s
+BenchMarking: Running time per prediction is around 0.02s. Expect logarithm time increase as training set size increasing.
