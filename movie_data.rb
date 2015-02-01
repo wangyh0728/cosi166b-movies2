@@ -137,51 +137,51 @@ class MovieData
 
     # similarity(user1,user2) - this will generate a number which indicates the similarity in movie 
     # preference between user1 and user2 (where higher numbers indicate greater similarity)
-    # def similarity(user1, user2) 
-    #     simil = 0.0;
-    #     movie_in_common = find_common_movies(user1,user2)
-
-    #     if movie_in_common.empty?
-    #         return 0.0
-    #     end
-    #     movie_in_common.each do |x|
-    #         #find index of the common movie/ratings
-    #         rating1 = cache_1[1][cache_1[0].index(x)]
-    #         rating2 = cache_2[1][cache_2[0].index(x)]
-    #         simil += (5-(rating1.to_i - rating2.to_i).abs)/5.0
-    #     end
-    #     return (simil/movie_in_common.size).round(2)
-    # end
-
-    # #find the common reviewed movies of user1 and user2
-    # def find_common_movies(user1,user2)
-    #     @cache_2 = reviews_hash[user2.to_i].transpose
-    #     @cache_1 = reviews_hash[user1.to_i].transpose
-    #     return cache_1[0] & cache_2[0]
-    # end
-
-
-
-
-
-
     def similarity(user1, user2) 
         simil = 0.0;
-        user1_movie_list = reviews_hash[user1.to_i].transpose
-        user2_movie_list = reviews_hash[user2.to_i].transpose
-        movie_in_common = user1_movie_list[0] & user2_movie_list[0]
+        movie_in_common = find_common_movies(user1,user2)
 
         if movie_in_common.empty?
             return 0.0
         end
         movie_in_common.each do |x|
             #find index of the common movie/ratings
-            simil1 = user1_movie_list[1][user1_movie_list[0].index(x)]
-            simil2 = user2_movie_list[1][user2_movie_list[0].index(x)]
-            simil += (5-(simil1.to_i - simil2.to_i).abs)/5.0
+            rating1 = cache_1[1][cache_1[0].index(x)]
+            rating2 = cache_2[1][cache_2[0].index(x)]
+            simil += (5-(rating1.to_i - rating2.to_i).abs)/5.0
         end
         return (simil/movie_in_common.size).round(2)
     end
+
+    #find the common reviewed movies of user1 and user2
+    def find_common_movies(user1,user2)
+        @cache_2 = reviews_hash[user2.to_i].transpose
+        @cache_1 = reviews_hash[user1.to_i].transpose
+        return cache_1[0] & cache_2[0]
+    end
+
+
+
+
+
+
+    # def similarity(user1, user2) 
+    #     simil = 0.0;
+    #     user1_movie_list = reviews_hash[user1.to_i].transpose
+    #     user2_movie_list = reviews_hash[user2.to_i].transpose
+    #     movie_in_common = user1_movie_list[0] & user2_movie_list[0]
+
+    #     if movie_in_common.empty?
+    #         return 0.0
+    #     end
+    #     movie_in_common.each do |x|
+    #         #find index of the common movie/ratings
+    #         simil1 = user1_movie_list[1][user1_movie_list[0].index(x)]
+    #         simil2 = user2_movie_list[1][user2_movie_list[0].index(x)]
+    #         simil += (5-(simil1.to_i - simil2.to_i).abs)/5.0
+    #     end
+    #     return (simil/movie_in_common.size).round(2)
+    # end
 
 
 
