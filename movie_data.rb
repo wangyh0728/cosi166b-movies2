@@ -27,21 +27,30 @@ class MovieData
             #movie_users_list: {"movie1" => [[user1,rating1], [user2,rating2]], "movie2" => ...}
             movie_id = split[1]
             user_id = split[0]
-            if movie_users_list[movie_id].nil?
-                movie_users_list[movie_id] = []
-            end
-            movie_users_list[movie_id] = movie_users_list[movie_id].push([user_id, split[2]])
+            self.loadMovie(movie_id,[user_id, split[2]])
             #push all reviews to reviews_hash as user_id is the key
             #review_hash = {"user1" => [[movie1,rating1,time1], [movie2,rating2,time2]], "user2" => ...}
-            if reviews_hash[user_id].nil?
-                reviews_hash[user_id] = []
-            end
-            reviews_hash[user_id] = reviews_hash[user_id].push(split[1..3])
+            self.loadReviewHash(user_id, split[1..3])
         end
         if !testpath.nil? 
                 self.loadTest(testpath)
         end
     end
+
+    def loadMovie(movie_id, contents)
+         if movie_users_list[movie_id].nil?
+                movie_users_list[movie_id] = []
+        end
+            movie_users_list[movie_id] = movie_users_list[movie_id].push(contents)
+    end
+
+    def loadReviewHash(user_id, contents)
+        if reviews_hash[user_id].nil?
+                reviews_hash[user_id] = []
+        end
+        reviews_hash[user_id] = reviews_hash[user_id].push(contents)
+    end
+
 
     def loadTest(testpath)
         txt = open(testpath.to_s)
@@ -155,7 +164,9 @@ class MovieData
         end
         movie_in_common.each do |x|
             #find index of the common movie/ratings
-            simil += (5-(user1_movie_list[1][user1_movie_list[0].index(x)].to_i - user2_movie_list[1][user2_movie_list[0].index(x)].to_i).abs)/5.0
+            simil1 = user1_movie_list[1][user1_movie_list[0].index(x)]
+            simil2 = user2_movie_list[1][user2_movie_list[0].index(x)]
+            simil += (5-(simil1.to_i - simil2.to_i).abs)/5.0
         end
         return (simil/movie_in_common.size).round(2)
     end
