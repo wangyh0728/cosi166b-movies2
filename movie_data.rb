@@ -27,29 +27,29 @@ class MovieData
             #movie_users_list: {"movie1" => [[user1,rating1], [user2,rating2]], "movie2" => ...}
             movie_id = split[1]
             user_id = split[0]
-            self.loadMovie(movie_id,[user_id, split[2]])
+            self.load(movie_users_list, movie_id,[user_id, split[2]])
             #push all reviews to reviews_hash as user_id is the key
             #review_hash = {"user1" => [[movie1,rating1,time1], [movie2,rating2,time2]], "user2" => ...}
-            self.loadReviewHash(user_id, split[1..3])
+            self.load(reviews_hash, user_id, split[1..3])
         end
         if !testpath.nil? 
                 self.loadTest(testpath)
         end
     end
 
-    def loadMovie(movie_id, contents)
-         if movie_users_list[movie_id].nil?
-                movie_users_list[movie_id] = []
+    def load(name, id, contents)
+         if name[id].nil?
+                name[id] = []
         end
-            movie_users_list[movie_id] = movie_users_list[movie_id].push(contents)
+            name[id] = name[id].push(contents)
     end
 
-    def loadReviewHash(user_id, contents)
-        if reviews_hash[user_id].nil?
-                reviews_hash[user_id] = []
-        end
-        reviews_hash[user_id] = reviews_hash[user_id].push(contents)
-    end
+    # def loadReviewHash(user_id, contents)
+    #     if reviews_hash[user_id].nil?
+    #             reviews_hash[user_id] = []
+    #     end
+    #     reviews_hash[user_id] = reviews_hash[user_id].push(contents)
+    # end
 
 
     def loadTest(testpath)
@@ -149,6 +149,10 @@ class MovieData
             predict_result.push(predict(test_set[i][0],test_set[i][1]))
         end
         test = MovieTest.new(test_set.transpose,predict_result)
+
+        # puts test.mean()
+        # print test.prediction_result
+        # puts
     end
 
     #similarity(user1,user2) - this will generate a number which indicates the similarity in movie 
