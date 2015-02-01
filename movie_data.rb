@@ -49,14 +49,6 @@ class MovieData
             name[id] = name[id].push(contents)
     end
 
-    # def loadReviewHash(user_id, contents)
-    #     if reviews_hash[user_id].nil?
-    #             reviews_hash[user_id] = []
-    #     end
-    #     reviews_hash[user_id] = reviews_hash[user_id].push(contents)
-    # end
-
-
     def loadTest(testpath)
         txt = open(testpath.to_s)
         txt.each_line do |x| 
@@ -69,10 +61,6 @@ class MovieData
     # and 0 if user u did not rate movie m
     def rating(user_id, movie_id) 
         movie_list = reviews_hash[user_id.to_i].transpose
-        # if movie_list.nil?
-        #   puts "No such user"
-        #   exit(0)
-        # end
         index = movie_list[0].index(movie_id.to_i)
         if index.nil?
             return 0
@@ -110,12 +98,6 @@ class MovieData
 
     # movies(u) - returns the array of movies that user u has watched
     def movies(user_id)
-        # begin 
-        #   return reviews_hash[user_id.to_i].transpose[0]
-        # rescue
-        #   puts "No such user"
-        #   exit(0)
-        # end
         return reviews_hash[user_id.to_i].transpose[0]
     end
 
@@ -123,12 +105,6 @@ class MovieData
 
     # viewers(m) - returns the array of users that have seen movie m
     def viewers(movie_id)
-        # begin 
-        #   return movie_users_list[movie_id.to_i].transpose[0]
-        # rescue
-        #   puts "No such movie"
-        #   exit(0)
-        # end
         return movie_users_list[movie_id.to_i].transpose[0]
     end
 
@@ -137,9 +113,9 @@ class MovieData
     # and returns a MovieTest object containing the results.
     #  The parameter k is optional and if omitted, all of the tests will be run.
     def run_test(k = nil)
-        # if test_set.empty?
-        #     return nil
-        # end
+        if test_set.empty?
+            return nil
+        end
         predict_result = []
         if k.nil?
             k = test_set.size
@@ -147,11 +123,8 @@ class MovieData
         (0..k-1).each do |i|
             predict_result.push(predict(test_set[i][0],test_set[i][1]))
         end
+        #initialize test
         test = MovieTest.new(test_set.transpose,predict_result)
-
-        puts test.mean()
-        print test.prediction_result
-        puts
     end
 
     # similarity(user1,user2) - this will generate a number which indicates the similarity in movie 
@@ -172,7 +145,7 @@ class MovieData
         return (simil/movie_in_common.size).round(2)
     end
 
-
+    #find the common reviewed movies of user1 and user2
     def find_common_movies(user1,user2)
         @cache_2 = reviews_hash[user2.to_i].transpose
         @cache_1 = reviews_hash[user1.to_i].transpose
@@ -209,9 +182,9 @@ class MovieTest
         @prediction_result.push(predict_data)
         @prediction_result = @prediction_result.transpose
     end
+
     # t.to_a returns an array of the predictions in the form [u,m,r,p]. 
     # You can also generate other types of error measures if you want, but we will rely mostly on the root mean square error.
-
     def to_a()
         return prediction_result
     end
@@ -244,7 +217,7 @@ end
 
 
 
-z = MovieData.new("ml-100k", :u2)
+z = MovieData.new("ml-100k", :ub)
 # (1..100).each do |i|
 #   puts z.predict(1,i)
 # end
@@ -252,6 +225,5 @@ z = MovieData.new("ml-100k", :u2)
 z.run_test()
 #puts z.most_similar(2)
 #puts z.similarity(1,3)
-#696.5
 
 
