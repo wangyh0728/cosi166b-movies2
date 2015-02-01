@@ -75,23 +75,27 @@ class MovieData
     # as an estimate of what user u would rate movie m
     # for each movie m, find all viewers u' and calculate similarity(u, u')*rating(u',m)
     def predict(user_id, movie_id)
-        count = 0;
         if user_similarity[user_id.to_i].nil?
             user_similarity[user_id.to_i] = most_similar(user_id.to_i)
         end
-        rating = 0.0
+        count, rating = calculate_similarity(user_id, movie_id)
+        if count == 0 
+            return 0.0 
+        end
+        return (rating/count).round(4)
+    end
+
+    def calculate_similarity(user_id,movie_id)
         #user_similarity: {"user1"=>{"user2"=>similarity, "user3" => similarity}, "user2"....}
+        count = 0;
+        rating = 0.0
         user_similarity[user_id.to_i].each do |u,s|
-            
             if (tmp = rating(u.to_i,movie_id.to_i)) != 0
                 count += 1
             end
             rating += (tmp * 1.0 * s).round(4)
         end
-        if count == 0 
-            return 0.0 
-        end
-        return (rating/count).round(4)
+        return count, rating
     end
 
 
