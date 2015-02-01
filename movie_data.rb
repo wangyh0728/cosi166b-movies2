@@ -4,12 +4,17 @@ class MovieData
     attr_accessor :movie_users_list
     attr_accessor :test_set
     attr_accessor :user_similarity
+    attr_accessor :cache_1
+    attr_accessor :cache_2
 
     def initialize(filepath, filename = nil)
         @reviews_hash = {}
         @movie_users_list = {}
         @test_set = []
         @user_similarity = {}
+        @cache_1 = []
+        @cache_2 = []
+
         test_file_name = ""
         training_file_name = ""
         if filename.nil? 
@@ -55,7 +60,7 @@ class MovieData
     def loadTest(testpath)
         txt = open(testpath.to_s)
         txt.each_line do |x| 
-            test_set.push(x.split("\t").map{|x| x.to_i})
+            @test_set.push(x.split("\t").map{|x| x.to_i})
         end
     end
 
@@ -95,15 +100,10 @@ class MovieData
             end
             rating += (tmp * 1.0 * s).round(4)
         end
-        begin 
-            return (rating/count).round(4)
-        rescue
-            return 0.0
+        if count == 0 
+            return 0.0 
         end
-        # if count == 0 
-        #     return 0.0 
-        # end
-        # return (rating/count).round(4)
+        return (rating/count).round(4)
     end
 
 
@@ -149,13 +149,13 @@ class MovieData
         end
         test = MovieTest.new(test_set.transpose,predict_result)
 
-        # puts test.mean()
-        # print test.prediction_result
-        # puts
+        puts test.mean()
+        print test.prediction_result
+        puts
     end
 
-    #similarity(user1,user2) - this will generate a number which indicates the similarity in movie 
-    #preference between user1 and user2 (where higher numbers indicate greater similarity)
+    # similarity(user1,user2) - this will generate a number which indicates the similarity in movie 
+    # preference between user1 and user2 (where higher numbers indicate greater similarity)
     def similarity(user1, user2) 
         simil = 0.0;
         movie_in_common = find_common_movies(user1,user2)
@@ -165,17 +165,18 @@ class MovieData
         end
         movie_in_common.each do |x|
             #find index of the common movie/ratings
-            rating1 = self.rating(user1, x)
-            rating2 = self.rating(user2, x)
+            rating1 = cache_1[1][cache_1[0].index(x)]
+            rating2 = cache_2[1][cache_2[0].index(x)]
             simil += (5-(rating1.to_i - rating2.to_i).abs)/5.0
         end
         return (simil/movie_in_common.size).round(2)
     end
 
+
     def find_common_movies(user1,user2)
-        user1_movie_list = reviews_hash[user1.to_i].transpose
-        user2_movie_list = reviews_hash[user2.to_i].transpose
-        return user1_movie_list[0] & user2_movie_list[0]
+        @cache_2 = reviews_hash[user2.to_i].transpose
+        @cache_1 = reviews_hash[user1.to_i].transpose
+        return cache_1[0] & cache_2[0]
     end
 
 
@@ -243,11 +244,14 @@ end
 
 
 
-z = MovieData.new("ml-100k", :u1)
+z = MovieData.new("ml-100k", :u2)
 # (1..100).each do |i|
 #   puts z.predict(1,i)
 # end
 #puts z.predict(2,314)
-z.run_test(10)
+z.run_test()
 #puts z.most_similar(2)
 #puts z.similarity(1,3)
+#696.5
+
+
