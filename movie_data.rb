@@ -4,14 +4,12 @@ class MovieData
     attr_accessor :movie_users_list
     attr_accessor :test_set
     attr_accessor :user_similarity
-    attr_accessor :prediction_result
 
     def initialize(filepath, filename = nil)
         @reviews_hash = {}
         @movie_users_list = {}
         @test_set = []
         @user_similarity = {}
-        @prediction_result = []
         test_file_name = ""
         training_file_name = ""
         if filename.nil? 
@@ -89,10 +87,15 @@ class MovieData
             end
             rating += (tmp * 1.0 * s).round(4)
         end
-        if count == 0 
-            return 0.0 
+        begin 
+            return (rating/count).round(4)
+        rescue
+            return 0.0
         end
-        return (rating/count).round(4)
+        # if count == 0 
+        #     return 0.0 
+        # end
+        # return (rating/count).round(4)
     end
 
 
@@ -121,13 +124,7 @@ class MovieData
         return movie_users_list[movie_id.to_i].transpose[0]
     end
 
-    # z.to_a returns an array of the predictions in the form [u,m,r,p]. 
-    # You can also generate other types of error measures if you want, but we will rely mostly on the root mean square error.
-    def to_a()
-        return prediction_result
-    end
-
-
+    
     # run_test(k) - runs the z.predict method on the first k ratings in the test set 
     # and returns a MovieTest object containing the results.
     #  The parameter k is optional and if omitted, all of the tests will be run.
@@ -142,12 +139,7 @@ class MovieData
         (0..k-1).each do |i|
             predict_result.push(predict(test_set[i][0],test_set[i][1]))
         end
-        tmp = test_set.transpose
-        test = MovieTest.new(tmp[2][0..k-1],predict_result)
-        #add results to prediction_result: [u,m,r,p]
-        (0..2).each {|i| prediction_result.push(tmp[i][0..k-1])}
-        prediction_result.push(predict_result)
-        @prediction_result = @prediction_result.transpose
+        test = MovieTest.new(test_set.transpose,predict_result)
     end
 
     #similarity(user1,user2) - this will generate a number which indicates the similarity in movie 
@@ -163,9 +155,7 @@ class MovieData
         end
         movie_in_common.each do |x|
             #find index of the common movie/ratings
-            simil1 = user1_movie_list[1][user1_movie_list[0].index(x)]
-            simil2 = user2_movie_list[1][user2_movie_list[0].index(x)]
-            simil += (5-(simil1.to_i - simil2.to_i).abs)/5.0
+            simil += (5-(user1_movie_list[1][user1_movie_list[0].index(x)].to_i - user2_movie_list[1][user2_movie_list[0].index(x)].to_i).abs)/5.0
         end
         return (simil/movie_in_common.size).round(2)
     end
@@ -185,17 +175,25 @@ end
 
 class MovieTest
     attr_accessor :error_list
+    attr_accessor :prediction_result
 
     def initialize(test_data, predict_data)
         @error_list = []
-        if test_data.size == predict_data.size
-            (0..test_data.size-1).each do |i|
-            error_list.push((test_data[i] - predict_data[i]).abs)
-            end
-        else 
-            puts "unmatched number of test_data and predict_data"
-            exit(0)
+        @prediction_result = []
+        #load error_list
+        (0..predict_data.size-1).each do |i|
+        error_list.push((test_data[2][i] - predict_data[i]).abs)
         end
+        #load prediction_result
+        (0..2).each {|i| prediction_result.push(test_data[i][0..predict_data.size-1])}
+        @prediction_result.push(predict_data)
+        @prediction_result = @prediction_result.transpose
+    end
+    # t.to_a returns an array of the predictions in the form [u,m,r,p]. 
+    # You can also generate other types of error measures if you want, but we will rely mostly on the root mean square error.
+
+    def to_a()
+        return prediction_result
     end
 
     # t.mean returns the average predication error (which should be close to zero)
@@ -220,6 +218,8 @@ class MovieTest
         return Math.sqrt(r)
     end
 
+
+
 end
 
 
@@ -229,8 +229,6 @@ z = MovieData.new("ml-100k", :u1)
 #   puts z.predict(1,i)
 # end
 #puts z.predict(2,314)
-#z.run_test(10)
+z.run_test(10)
 #puts z.most_similar(2)
-#puts z.similarity(1,34)
-print z.test_set
-puts
+#puts z.similarity(1,3)
