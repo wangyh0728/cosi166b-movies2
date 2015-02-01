@@ -63,12 +63,11 @@ class MovieData
     # rating(u,m) - returns the rating that user u gave movie m in the training set, 
     # and 0 if user u did not rate movie m
     def rating(user_id, movie_id) 
-        movie_list = reviews_hash[user_id.to_i]
+        movie_list = reviews_hash[user_id.to_i].transpose
         # if movie_list.nil?
         #   puts "No such user"
         #   exit(0)
         # end
-        movie_list = movie_list.transpose
         index = movie_list[0].index(movie_id.to_i)
         if index.nil?
             return 0
@@ -159,21 +158,26 @@ class MovieData
     #preference between user1 and user2 (where higher numbers indicate greater similarity)
     def similarity(user1, user2) 
         simil = 0.0;
-        user1_movie_list = reviews_hash[user1.to_i].transpose
-        user2_movie_list = reviews_hash[user2.to_i].transpose
-        movie_in_common = user1_movie_list[0] & user2_movie_list[0]
+        movie_in_common = find_common_movies(user1,user2)
 
         if movie_in_common.empty?
             return 0.0
         end
         movie_in_common.each do |x|
             #find index of the common movie/ratings
-            simil1 = user1_movie_list[1][user1_movie_list[0].index(x)]
-            simil2 = user2_movie_list[1][user2_movie_list[0].index(x)]
-            simil += (5-(simil1.to_i - simil2.to_i).abs)/5.0
+            rating1 = self.rating(user1, x)
+            rating2 = self.rating(user2, x)
+            simil += (5-(rating1.to_i - rating2.to_i).abs)/5.0
         end
         return (simil/movie_in_common.size).round(2)
     end
+
+    def find_common_movies(user1,user2)
+        user1_movie_list = reviews_hash[user1.to_i].transpose
+        user2_movie_list = reviews_hash[user2.to_i].transpose
+        return user1_movie_list[0] & user2_movie_list[0]
+    end
+
 
     #most_similar(u) - this return a list of users whose tastes are most similar to the tastes of user u
     #only return the top ten similar users
